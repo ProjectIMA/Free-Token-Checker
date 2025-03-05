@@ -21,8 +21,8 @@ If you don't have Node.js installed, follow this guide:
 ## Installation
 1. **Download or Clone this Repository**
    ```sh
-   git clone https://github.com/your-repo-name/discord-token-checker.git
-   cd discord-token-checker
+   git clone https://github.com/ProjectIMA/Free-Token-Checker-Open-Source
+   cd Free-Token-Checker
    ```
 2. **Install Required Dependencies**
    ```sh
