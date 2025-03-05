@@ -55,10 +55,17 @@ Phone Verified: Yes
 Join Date: 2023-01-01T12:00:00.000Z
 Owned Servers: My Server (ID: 987654321098765432)
 ```
+## Token Formatter
+
+We also have a Token Formatter to help clean and structure your token lists before checking them.
+You can find it here: [Token Formatter](https://github.com/ProjectIMA/token-formatter)
 
 ## Important Notes
 - **This script is for educational purposes only!** Do not use it for malicious activities.
 - **Rate limits may apply if too many tokens are checked quickly.** Use a delay if necessary.
+
+## License
+This script is open-source. Feel free to modify and distribute as needed.
 
 ## Disclaimer
 We do not support or promote any illegal activities. This script is for testing purposes only and should be used responsibly.
