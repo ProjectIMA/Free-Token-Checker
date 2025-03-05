@@ -21,7 +21,7 @@ If you don't have Node.js installed, follow this guide:
 ## Installation
 1. **Download or Clone this Repository**
    ```sh
-   git clone https://github.com/ProjectIMA/Free-Token-Checker-Open-Source
+   git clone https://github.com/ProjectIMA/Free-Token-Checker
    cd Free-Token-Checker
    ```
 2. **Install Required Dependencies**
