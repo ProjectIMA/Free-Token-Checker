@@ -63,3 +63,7 @@ Owned Servers: My Server (ID: 987654321098765432)
 ## Disclaimer
 We do not support or promote any illegal activities. This script is for testing purposes only and should be used responsibly.
 
+## Contact
+
+For any inquiries, you can reach me on Discord: **cannon06402**
+
