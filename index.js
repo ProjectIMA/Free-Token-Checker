@@ -1,4 +1,5 @@
 const { Client, Intents } = require("discord.js-selfbot-v13");
+const axios = require("axios"); // For REST API requests
 const fs = require("fs");
 const colors = require("colors");
 
@@ -11,6 +12,8 @@ let phoneConnected = 0;
 let bothConnected = 0;
 let twoFAEnabled = 0;
 let nitroCount = 0;
+let boostAvailableCount = 0; // Tokens with available boosts
+let canBoostCount = 0; // Tokens that can boost a server
 
 async function checkToken(token) {
     const client = new Client({
@@ -56,42 +59,32 @@ async function checkToken(token) {
             console.log("Nitro Status: Inactive".magenta);
         }
 
-        const boostsAvailable = user.premiumGuildBoostCount || 0;
-        console.log(`Boosts Available: ${boostsAvailable}`.magenta);
-
-        // Check Boosted Servers
-        const boostedServers = [];
-        for (const guild of client.guilds.cache.values()) {
-            const member = guild.members.cache.get(user.id);
-            if (member && member.premiumSince) {
-                boostedServers.push({
-                    name: guild.name,
-                    id: guild.id,
-                    boostedSince: member.premiumSince.toISOString()
-                });
-            }
-        }
-
-        console.log(`Boosted Servers: ${boostedServers.length}`.magenta);
-        if (boostedServers.length > 0) {
-            console.log("Boosted Servers:".magenta);
-            boostedServers.forEach(server => {
-                console.log(` - ${server.name} (ID: ${server.id}) - Boosted Since: ${server.boostedSince}`.magenta);
+        // Fetch Boost Information via REST API
+        let boostsAvailable = 0;
+        try {
+            const response = await axios.get("https://discord.com/api/v9/users/@me/guilds/premium/subscription-slots", {
+                headers: {
+                    Authorization: token,
+                },
             });
-        } else {
-            console.log("Boosted Servers: None".magenta);
+
+            // Count available boosts (slots not on cooldown)
+            boostsAvailable = response.data.filter(slot => slot.cooldown_ends_at === null).length;
+            console.log(`Boosts Available (API): ${boostsAvailable}`.magenta);
+        } catch (error) {
+            console.log("Failed to fetch boost information from API.".red);
         }
 
-        const ownedGuilds = client.guilds.cache.filter((guild) => guild.ownerId === user.id);
-        if (ownedGuilds.size > 0) {
-            console.log(`Owned Servers: ${ownedGuilds.size}`.yellow);
-            ownedGuilds.forEach((guild) => {
-                console.log(` - ${guild.name} (ID: ${guild.id})`.yellow);
-            });
+        // Check if the token can boost a server
+        const canBoost = nitroStatus !== "Inactive" && boostsAvailable > 0;
+        if (canBoost) {
+            console.log("This token CAN boost a server.".green);
+            canBoostCount++; // Increment can boost count
         } else {
-            console.log("Owned Servers: None".yellow);
+            console.log("This token CANNOT boost a server.".red);
         }
 
+        // Save valid token details
         validTokens.push({
             token: token,
             username: user.tag,
@@ -102,8 +95,7 @@ async function checkToken(token) {
             joinDate: user.createdAt.toISOString(),
             nitroStatus: nitroStatus,
             boostsAvailable: boostsAvailable,
-            boostedServers: boostedServers,
-            ownedGuilds: ownedGuilds.map(guild => ({ name: guild.name, id: guild.id }))
+            canBoost: canBoost, // Add whether the token can boost
         });
     } else {
         console.log("Failed to fetch user information.".red);
@@ -115,8 +107,10 @@ async function checkToken(token) {
 }
 
 function writeTokensToFiles() {
+    // Save valid tokens to a file
     fs.writeFileSync("valid_tokens.txt", validTokens.map(t => t.token).join("\n"), "utf-8");
 
+    // Save detailed valid tokens to a file
     const detailedTokens = validTokens.map(t => {
         const details = [
             `Token: ${t.token}`,
@@ -128,16 +122,13 @@ function writeTokensToFiles() {
             `Join Date: ${t.joinDate}`,
             `Nitro Status: ${t.nitroStatus}`,
             `Boosts Available: ${t.boostsAvailable}`,
-            `Boosted Servers: ${t.boostedServers.length > 0 ? t.boostedServers.map(g => `${g.name} (ID: ${g.id}) - Boosted Since: ${g.boostedSince}`).join(", ") : "None"}`,
-            `Owned Servers: ${t.ownedGuilds.length > 0 ? t.ownedGuilds.map(g => `${g.name} (ID: ${g.id})`).join(", ") : "None"}`
+            `Can Boost: ${t.canBoost ? "Yes" : "No"}`,
         ];
 
         return details.join(" | ");
     });
 
     fs.writeFileSync("detailed_valid_tokens.txt", detailedTokens.join("\n\n"), "utf-8");
-
-    fs.writeFileSync("invalid_tokens.txt", invalidTokens.join("\n"), "utf-8");
 
     console.log("\nValid tokens have been saved to valid_tokens.txt".green);
     console.log("Detailed valid tokens have been saved to detailed_valid_tokens.txt".green);
@@ -152,6 +143,8 @@ function printMetrics() {
     console.log(`Tokens with Both Email and Phone Connected: ${bothConnected}`.cyan);
     console.log(`Tokens with 2FA Enabled: ${twoFAEnabled}`.cyan);
     console.log(`Tokens with Nitro: ${nitroCount}`.magenta);
+    console.log(`Tokens with Boosts Available: ${boostAvailableCount}`.magenta);
+    console.log(`Tokens that CAN Boost: ${canBoostCount}`.magenta); // New metric
 }
 
 async function main() {
