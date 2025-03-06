@@ -1,5 +1,5 @@
 const { Client, Intents } = require("discord.js-selfbot-v13");
-const axios = require("axios"); // For REST API requests
+const axios = require("axios"); 
 const fs = require("fs");
 const colors = require("colors");
 
@@ -12,8 +12,8 @@ let phoneConnected = 0;
 let bothConnected = 0;
 let twoFAEnabled = 0;
 let nitroCount = 0;
-let boostAvailableCount = 0; // Tokens with available boosts
-let canBoostCount = 0; // Tokens that can boost a server
+let boostAvailableCount = 0; 
+let canBoostCount = 0; 
 
 async function checkToken(token) {
     const client = new Client({
@@ -45,7 +45,6 @@ async function checkToken(token) {
         if (user.verified && user.phone) bothConnected++;
         if (user.mfaEnabled) twoFAEnabled++;
 
-        // Check Nitro Status
         const nitroTypes = {
             1: "Nitro Classic",
             2: "Nitro",
@@ -59,7 +58,6 @@ async function checkToken(token) {
             console.log("Nitro Status: Inactive".magenta);
         }
 
-        // Fetch Boost Information via REST API
         let boostsAvailable = 0;
         try {
             const response = await axios.get("https://discord.com/api/v9/users/@me/guilds/premium/subscription-slots", {
@@ -68,18 +66,16 @@ async function checkToken(token) {
                 },
             });
 
-            // Count available boosts (slots not on cooldown)
             boostsAvailable = response.data.filter(slot => slot.cooldown_ends_at === null).length;
             console.log(`Boosts Available (API): ${boostsAvailable}`.magenta);
         } catch (error) {
             console.log("Failed to fetch boost information from API.".red);
         }
 
-        // Check if the token can boost a server
         const canBoost = nitroStatus !== "Inactive" && boostsAvailable > 0;
         if (canBoost) {
             console.log("This token CAN boost a server.".green);
-            canBoostCount++; // Increment can boost count
+            canBoostCount++; 
         } else {
             console.log("This token CANNOT boost a server.".red);
         }
@@ -95,7 +91,7 @@ async function checkToken(token) {
             joinDate: user.createdAt.toISOString(),
             nitroStatus: nitroStatus,
             boostsAvailable: boostsAvailable,
-            canBoost: canBoost, // Add whether the token can boost
+            canBoost: canBoost,
         });
     } else {
         console.log("Failed to fetch user information.".red);
@@ -107,10 +103,8 @@ async function checkToken(token) {
 }
 
 function writeTokensToFiles() {
-    // Save valid tokens to a file
     fs.writeFileSync("valid_tokens.txt", validTokens.map(t => t.token).join("\n"), "utf-8");
 
-    // Save detailed valid tokens to a file
     const detailedTokens = validTokens.map(t => {
         const details = [
             `Token: ${t.token}`,
