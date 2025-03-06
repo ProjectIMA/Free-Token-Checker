@@ -53,7 +53,12 @@ Email Verified: Yes
 2FA Enabled: No
 Phone Verified: Yes
 Join Date: 2023-01-01T12:00:00.000Z
-Owned Servers: My Server (ID: 987654321098765432)
+Nitro Status: Nitro
+Boosts Available: 2
+Boosted Servers: 1
+ - My Awesome Server (ID: 123456789012345678) - Boosted Since: 2024-07-20T12:34:56.789Z
+Owned Servers: 1
+ - My Server (ID: 987654321098765432)
 ```
 ## Token Formatter
 
