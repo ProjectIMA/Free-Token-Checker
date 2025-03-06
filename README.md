@@ -26,7 +26,7 @@ If you don't have Node.js installed, follow this guide:
    ```
 2. **Install Required Dependencies**
    ```sh
-   npm install discord.js-selfbot-v13 colors fs
+   npm install discord.js-selfbot-v13 colors fs axios
    ```
 
 ## How to Use
