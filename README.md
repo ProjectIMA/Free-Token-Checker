@@ -54,7 +54,7 @@ Email Verified: Yes
 Phone Verified: Yes
 Join Date: 2023-01-01T12:00:00.000Z
 Nitro Status: Nitro
-Boosts Available: 2
+Boosts Available: 2 (not tested because I couldn't please contact me if it doesn't work infos bellow)
 Boosted Servers: 1
  - My Awesome Server (ID: 123456789012345678) - Boosted Since: 2024-07-20T12:34:56.789Z
 Owned Servers: 1
