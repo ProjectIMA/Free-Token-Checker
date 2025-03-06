@@ -46,19 +46,16 @@ If you don't have Node.js installed, follow this guide:
 
 ## Example Output
 ```
-Token: XXXXXXXXXXXXXXX... is valid!
-Username: ExampleUser#1234
-User ID: 123456789012345678
-Email Verified: Yes
-2FA Enabled: No
-Phone Verified: Yes
-Join Date: 2023-01-01T12:00:00.000Z
+Token: abcdef1234567890... is valid!
+Username: User#5678
+User ID: 987654321098765432
+Email Verified: No
+2FA Enabled: Yes
+Phone Verified: No
+Join Date: 2021-01-01T00:00:00.000Z
 Nitro Status: Nitro
-Boosts Available: 2 (not tested because I couldn't please contact me if it doesn't work infos bellow)
-Boosted Servers: 1
- - My Awesome Server (ID: 123456789012345678) - Boosted Since: 2024-07-20T12:34:56.789Z
-Owned Servers: 1
- - My Server (ID: 987654321098765432)
+Boosts Available (API): 0
+This token CANNOT boost a server.
 ```
 ## Token Formatter
 
