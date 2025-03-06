@@ -10,6 +10,7 @@ let emailConnected = 0;
 let phoneConnected = 0;
 let bothConnected = 0;
 let twoFAEnabled = 0;
+let nitroCount = 0;
 
 async function checkToken(token) {
     const client = new Client({
@@ -34,12 +35,52 @@ async function checkToken(token) {
         console.log(`Email Verified: ${user.verified ? "Yes" : "No"}`.cyan);
         console.log(`2FA Enabled: ${user.mfaEnabled ? "Yes" : "No"}`.cyan);
         console.log(`Phone Verified: ${user.phone ? "Yes" : "No"}`.cyan);
-        console.log(`Join Date: ${user.createdAt.toISOString()}`.cyan); 
+        console.log(`Join Date: ${user.createdAt.toISOString()}`.cyan);
 
         if (user.verified) emailConnected++;
         if (user.phone) phoneConnected++;
         if (user.verified && user.phone) bothConnected++;
         if (user.mfaEnabled) twoFAEnabled++;
+
+        // Check Nitro Status
+        const nitroTypes = {
+            1: "Nitro Classic",
+            2: "Nitro",
+            3: "Nitro Basic"
+        };
+        const nitroStatus = nitroTypes[user.premiumType] || "Inactive";
+        if (nitroStatus !== "Inactive") {
+            nitroCount++;
+            console.log(`Nitro Status: ${nitroStatus}`.magenta);
+        } else {
+            console.log("Nitro Status: Inactive".magenta);
+        }
+
+        const boostsAvailable = user.premiumGuildBoostCount || 0;
+        console.log(`Boosts Available: ${boostsAvailable}`.magenta);
+
+        // Check Boosted Servers
+        const boostedServers = [];
+        for (const guild of client.guilds.cache.values()) {
+            const member = guild.members.cache.get(user.id);
+            if (member && member.premiumSince) {
+                boostedServers.push({
+                    name: guild.name,
+                    id: guild.id,
+                    boostedSince: member.premiumSince.toISOString()
+                });
+            }
+        }
+
+        console.log(`Boosted Servers: ${boostedServers.length}`.magenta);
+        if (boostedServers.length > 0) {
+            console.log("Boosted Servers:".magenta);
+            boostedServers.forEach(server => {
+                console.log(` - ${server.name} (ID: ${server.id}) - Boosted Since: ${server.boostedSince}`.magenta);
+            });
+        } else {
+            console.log("Boosted Servers: None".magenta);
+        }
 
         const ownedGuilds = client.guilds.cache.filter((guild) => guild.ownerId === user.id);
         if (ownedGuilds.size > 0) {
@@ -59,6 +100,9 @@ async function checkToken(token) {
             twoFAEnabled: user.mfaEnabled,
             phoneVerified: user.phone,
             joinDate: user.createdAt.toISOString(),
+            nitroStatus: nitroStatus,
+            boostsAvailable: boostsAvailable,
+            boostedServers: boostedServers,
             ownedGuilds: ownedGuilds.map(guild => ({ name: guild.name, id: guild.id }))
         });
     } else {
@@ -82,13 +126,16 @@ function writeTokensToFiles() {
             `2FA Enabled: ${t.twoFAEnabled ? "Yes" : "No"}`,
             `Phone Verified: ${t.phoneVerified ? "Yes" : "No"}`,
             `Join Date: ${t.joinDate}`,
+            `Nitro Status: ${t.nitroStatus}`,
+            `Boosts Available: ${t.boostsAvailable}`,
+            `Boosted Servers: ${t.boostedServers.length > 0 ? t.boostedServers.map(g => `${g.name} (ID: ${g.id}) - Boosted Since: ${g.boostedSince}`).join(", ") : "None"}`,
             `Owned Servers: ${t.ownedGuilds.length > 0 ? t.ownedGuilds.map(g => `${g.name} (ID: ${g.id})`).join(", ") : "None"}`
         ];
 
         return details.join(" | ");
     });
 
-    fs.writeFileSync("detailed_valid_tokens.txt", detailedTokens.join("\n"), "utf-8");
+    fs.writeFileSync("detailed_valid_tokens.txt", detailedTokens.join("\n\n"), "utf-8");
 
     fs.writeFileSync("invalid_tokens.txt", invalidTokens.join("\n"), "utf-8");
 
@@ -104,6 +151,7 @@ function printMetrics() {
     console.log(`Tokens with Phone Connected: ${phoneConnected}`.cyan);
     console.log(`Tokens with Both Email and Phone Connected: ${bothConnected}`.cyan);
     console.log(`Tokens with 2FA Enabled: ${twoFAEnabled}`.cyan);
+    console.log(`Tokens with Nitro: ${nitroCount}`.magenta);
 }
 
 async function main() {
@@ -116,7 +164,7 @@ async function main() {
 
         for (const token of tokens) {
             await checkToken(token.trim());
-            await new Promise(resolve => setTimeout(resolve, 1)); // delay to avoid rate limit ig 💩
+            await new Promise(resolve => setTimeout(resolve, 1));
         }
 
         writeTokensToFiles();
