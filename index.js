@@ -25,9 +25,7 @@ async function checkToken(token) {
         await client.login(token);
     } catch (error) {
         console.log(`Token: ${token.slice(0, 20)}... is invalid!`.red);
-        invalidTokens.push(token);
-        totalScanned++;
-        return;
+        return false;
     }
 
     const user = client.user;
@@ -80,7 +78,6 @@ async function checkToken(token) {
             console.log("This token CANNOT boost a server.".red);
         }
 
-        // Save valid token details
         validTokens.push({
             token: token,
             username: user.tag,
@@ -97,9 +94,8 @@ async function checkToken(token) {
         console.log("Failed to fetch user information.".red);
     }
 
-    totalScanned++;
-
     client.destroy();
+    return true;
 }
 
 function writeTokensToFiles() {
@@ -123,6 +119,7 @@ function writeTokensToFiles() {
     });
 
     fs.writeFileSync("detailed_valid_tokens.txt", detailedTokens.join("\n\n"), "utf-8");
+    fs.writeFileSync("invalid_tokens.txt", invalidTokens.join("\n"), "utf-8");
 
     console.log("\nValid tokens have been saved to valid_tokens.txt".green);
     console.log("Detailed valid tokens have been saved to detailed_valid_tokens.txt".green);
@@ -137,25 +134,33 @@ function printMetrics() {
     console.log(`Tokens with Both Email and Phone Connected: ${bothConnected}`.cyan);
     console.log(`Tokens with 2FA Enabled: ${twoFAEnabled}`.cyan);
     console.log(`Tokens with Nitro: ${nitroCount}`.magenta);
-    console.log(`Tokens with Boosts Available: ${boostAvailableCount}`.magenta);
-    console.log(`Tokens that CAN Boost: ${canBoostCount}`.magenta); // New metric
+    console.log(`Tokens that CAN Boost: ${canBoostCount}`.magenta);
 }
 
 async function main() {
     try {
-        const tokens = fs.readFileSync("tokens.txt", "utf-8").split("\n").filter((token) => token.trim());
-        if (tokens.length === 0) {
+        const lines = fs.readFileSync("tokens.txt", "utf-8").split("\n").filter(line => line.trim());
+        if (lines.length === 0) {
             console.log("No tokens found in tokens.txt".red);
             return;
         }
 
-        for (const token of tokens) {
-            await checkToken(token.trim());
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            const parts = trimmedLine.split(':');
+            const token = parts.length >= 3 ? parts[2].trim() : trimmedLine;
+            
+            const isValid = await checkToken(token);
+            totalScanned++;
+            
+            if (!isValid) {
+                invalidTokens.push(trimmedLine);
+            }
+            
             await new Promise(resolve => setTimeout(resolve, 1));
         }
 
         writeTokensToFiles();
-
         printMetrics();
     } catch (error) {
         console.log("Error: tokens.txt file not found".red);
