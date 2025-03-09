@@ -74,5 +74,5 @@ We do not support or promote any illegal activities. This script is for testing 
 
 ## Contact
 
-For any inquiries, you can reach me on Discord: **cannon06402**
+For any inquiries, you can reach me on Discord: **keritto320**
 
